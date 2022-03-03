@@ -36,19 +36,21 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     try {
       const lastCartUpdate = [...cart]
       const productOnCart = lastCartUpdate.find(product => product.id === productId)
+
+      
       const productStock = await api.get(`/stock/${productId}`)
       const productStockAmount = productStock.data.amount;
 
       const amount = productOnCart ? productOnCart.amount : 0
       const desiredAmount = amount + 1
 
-      if (productStockAmount < desiredAmount) {
+      if ( desiredAmount > productStockAmount ) {
         toast.error('Quantidade solicitada fora de estoque');
         return;
       } 
 
       if (productOnCart) {
-        productOnCart.amount = amount;
+        productOnCart.amount = desiredAmount;
       } else {
         const product = await api.get(`/products/${productId}`)
         const productWithAmount = {
@@ -70,7 +72,6 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       const lastCartUpdate = [...cart]
       const productOnCart = lastCartUpdate.findIndex(product => product.id === productId)
       
-
       if(productOnCart >= 0) {
         lastCartUpdate.splice(productOnCart, 1)
         setCart(lastCartUpdate)
@@ -110,7 +111,6 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       } else {
         throw Error();
       }
-
     } catch {
       toast.error('Erro na alteração de quantidade do produto');
     }
